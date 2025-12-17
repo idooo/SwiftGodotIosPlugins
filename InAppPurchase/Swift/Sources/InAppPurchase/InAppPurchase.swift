@@ -56,6 +56,13 @@ enum InAppPurchaseError: Int, Error {
 class InAppPurchase: Object , ObservableObject {
 
     static var shared: InAppPurchase?
+
+    // Static ISO8601 formatter for performance (creating formatters is expensive)
+    private static let iso8601Formatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
     var availableProducts: [InAppPurchaseProduct] = []
     var purchasedProductIDs: Set<String> = []
     internal var products_cached: [Product] = []
@@ -222,10 +229,8 @@ class InAppPurchase: Object , ObservableObject {
         // JWS representation - cryptographic proof for server validation
         dict["jws_representation"] = Variant(result.jwsRepresentation)
 
-        // Purchase date in ISO8601 format
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        dict["purchase_date"] = Variant(formatter.string(from: transaction.purchaseDate))
+        // Purchase date in ISO8601 format (using static formatter for performance)
+        dict["purchase_date"] = Variant(Self.iso8601Formatter.string(from: transaction.purchaseDate))
 
         // App account token (optional UUID set during purchase)
         if let appAccountToken = transaction.appAccountToken {

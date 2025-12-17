@@ -58,11 +58,11 @@ class AppleSignIn: Object {
 
     #if canImport(UIKit)
     private var presentationAnchor: ASPresentationAnchor? {
-        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = scene.windows.first else {
+        guard let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else {
             return nil
         }
-        return window
+        // Prefer key window, fall back to first window
+        return scene.windows.first(where: { $0.isKeyWindow }) ?? scene.windows.first
     }
     #endif
 
@@ -201,17 +201,9 @@ class AppleSignIn: Object {
         let delegate = AppleSignInDelegate(plugin: self)
 
         // Store delegate as instance property to prevent deallocation
+        // (ASAuthorizationController's delegate property is weak, so we need to retain it)
         self.currentDelegate = delegate
         GD.print("[AppleSignIn] Created and stored delegate")
-
-        // Also store delegate on controller
-        objc_setAssociatedObject(
-            authorizationController,
-            "delegate",
-            delegate,
-            .OBJC_ASSOCIATION_RETAIN_NONATOMIC
-        )
-        GD.print("[AppleSignIn] Associated delegate with controller")
 
         authorizationController.delegate = delegate
         authorizationController.presentationContextProvider = delegate
@@ -389,14 +381,24 @@ class AppleSignInDelegate: NSObject, ASAuthorizationControllerDelegate, ASAuthor
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         GD.print("[AppleSignInDelegate] presentationAnchor() called")
 
-        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = scene.windows.first else {
-            GD.print("[AppleSignInDelegate] WARNING: Could not get window, creating fallback")
+        guard let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else {
+            GD.print("[AppleSignInDelegate] WARNING: Could not get active scene, creating fallback")
             return UIWindow()
         }
 
-        GD.print("[AppleSignInDelegate] Returning window as presentation anchor")
-        return window
+        // Prefer key window, fall back to first window
+        if let keyWindow = scene.windows.first(where: { $0.isKeyWindow }) {
+            GD.print("[AppleSignInDelegate] Returning key window as presentation anchor")
+            return keyWindow
+        }
+
+        if let firstWindow = scene.windows.first {
+            GD.print("[AppleSignInDelegate] Returning first window as presentation anchor")
+            return firstWindow
+        }
+
+        GD.print("[AppleSignInDelegate] WARNING: No windows available, creating fallback")
+        return UIWindow()
     }
 }
 #endif
