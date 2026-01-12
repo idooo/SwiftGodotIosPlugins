@@ -132,6 +132,29 @@ extension InAppPurchase {
             completion(transactions)
         }
     }
+
+    internal func fetchTransactionsAsync(
+        completion: @escaping (Set<Transaction>) -> Void
+    ) {
+        Task {
+            var transactions = Set<Transaction>()
+            // Fetch all entitlements and filter valid transactions
+            for await latestTransaction in Transaction
+                .all
+            {
+                switch latestTransaction
+                {
+                case .verified(let transaction):
+                    transactions.insert(transaction)
+                case .unverified(
+                    let unverifiedTransaction, let verificationError):
+                    continue
+                }
+            }
+            // Call the completion handler with auto-renewable subscription transactions
+            completion(transactions)
+        }
+    }
     
     internal func restorePurchasesAsync(
         skipSync noSync: Bool,

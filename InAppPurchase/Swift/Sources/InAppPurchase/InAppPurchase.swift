@@ -103,6 +103,9 @@ class InAppPurchase: Object , ObservableObject {
     /// @Signal
     /// Error signal during purchase restore process
     @Signal var inAppPurchaseRestoreError: SignalWithArguments<Int, String>
+    /// @Signal
+    /// Success signal during transactions fetch process
+    @Signal var inAppPurchaseFetchTransactions: SignalWithArguments<GArray>
 
     required override init() {
         super.init()
@@ -166,6 +169,22 @@ class InAppPurchase: Object , ObservableObject {
     ///
     /// Synchronously fetches all auto-renewable subscription transactions (does not block UI, callback when done)
     @Callable
+    func fetchTransactions() {
+        fetchTransactionsAsync(completion: { transactions in
+            var transactionsArray = GArray()
+            transactions.forEach { transaction in
+                transactionsArray.append(Variant(self.convertTransactionToDictionary(from: transaction)))
+            }
+            DispatchQueue.main.async {
+                self.inAppPurchaseFetchTransactions.emit(transactionsArray)
+            }
+        })
+    }
+
+    /// @Callable
+    ///
+    /// Synchronously fetches all auto-renewable subscription transactions (does not block UI, callback when done)
+    @Callable
     func fetchAutoRenewableTransactionCounts() {
         fetchAutoRenewableTransactionsAsync(completion: { transactions in
             
@@ -206,18 +225,19 @@ class InAppPurchase: Object , ObservableObject {
                     self.inAppPurchaseSuccess.emit(productID)
 
                     // Build transaction data dictionary for server-side validation
-                    let transactionData = self.buildTransactionDictionary(from: result)
+                    let transactionData = self.convertTransactionToDictionary(from: result.transaction)
+
+                    // Add JWS representation - cryptographic proof for server validation
+                    transactionData["jws_representation"] = Variant(result.jwsRepresentation)
+
                     self.inAppPurchaseSuccessWithTransaction.emit(transactionData)
                 }
             })
     }
 
-    /// Builds a GDictionary containing transaction data for server-side validation
-    private func buildTransactionDictionary(from result: TransactionResult) -> GDictionary {
+    private func convertTransactionToDictionary(from transaction: Transaction) -> GDictionary {
         var dict = GDictionary()
-        let transaction = result.transaction
-
-        // Product identifier
+         // Product identifier
         dict["product_id"] = Variant(transaction.productID)
 
         // Transaction ID (UInt64 as String for cross-platform compatibility)
@@ -225,9 +245,6 @@ class InAppPurchase: Object , ObservableObject {
 
         // Original transaction ID (for subscription renewals)
         dict["original_transaction_id"] = Variant(String(transaction.originalID))
-
-        // JWS representation - cryptographic proof for server validation
-        dict["jws_representation"] = Variant(result.jwsRepresentation)
 
         // Purchase date in ISO8601 format (using static formatter for performance)
         dict["purchase_date"] = Variant(Self.iso8601Formatter.string(from: transaction.purchaseDate))
@@ -238,7 +255,6 @@ class InAppPurchase: Object , ObservableObject {
         } else {
             dict["app_account_token"] = Variant("")
         }
-
         return dict
     }
 
