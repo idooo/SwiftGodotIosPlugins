@@ -32,6 +32,7 @@ extension InAppPurchase {
 
     internal func purchaseProductAsync(
         _ productID: String,
+        appAccountToken: UUID?,
         completion: @escaping (TransactionResult?, InAppPurchaseError?) -> Void
     ) {
         guard let product = products_cached.first(where: { $0.id == productID })
@@ -39,9 +40,13 @@ extension InAppPurchase {
             completion(nil, .productNotFound)
             return
         }
+        var options: Set<Product.PurchaseOption> = []
+        if let token = appAccountToken {
+            options.insert(.appAccountToken(token))
+        }
         Task {
             do {
-                let result = try await product.purchase()
+                let result = try await product.purchase(options: options)
                 switch result {
                 case .success(let verification):
                     switch verification {

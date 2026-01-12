@@ -208,10 +208,17 @@ class InAppPurchase: Object , ObservableObject {
     /// @Callable
     ///
     /// Synchronously purchase a product (does not block UI, callback when done)
+    /// - Parameters:
+    ///   - productID: The product identifier to purchase
+    ///   - appAccountToken: Optional UUID string for linking the transaction to a user account
     @Callable
-    func purchaseProduct(_ productID: String) {
+    func purchaseProduct(_ productID: String, appAccountToken: String = "") {
+        // Convert string to UUID if provided and valid
+        let token: UUID? = appAccountToken.isEmpty ? nil : UUID(uuidString: appAccountToken)
+
         purchaseProductAsync(
             productID,
+            appAccountToken: token,
             completion: { result, error in
                 guard error == nil, let result = result else {
                     DispatchQueue.main.async {
