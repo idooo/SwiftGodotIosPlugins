@@ -56,14 +56,14 @@ func _on_in_app_purchase_restore_error(error: int, message: String) -> void:
 - `in_app_purchase_restore_error` SignalWithArguments\<Int,Dictionary>
 
 ### Transaction Data Exposed in `in_app_purchase_success_with_transaction`
-| Key 	| Type | 	Description| 
-| --- | --- | --- |
-| `product_id` 	| String | 	Product identifier| 
-| `transaction_id` | 	String | 	Unique transaction ID (UInt64 as String)| 
-| `original_transaction_id`|  	String | 	For subscription renewals| 
-| `jws_representation` 	| String 	| Cryptographic proof for server validation| 
-| `purchase_date` 	| String 	| ISO8601 formatted timestamp| 
-| `app_account_token` 	| String | 	Optional UUID (empty string if not set)| 
+| Key                       | Type   | Description                               |
+| ------------------------- | ------ | ----------------------------------------- |
+| `product_id`              | String | Product identifier                        |
+| `transaction_id`          | String | Unique transaction ID (UInt64 as String)  |
+| `original_transaction_id` | String | For subscription renewals                 |
+| `jws_representation`      | String | Cryptographic proof for server validation |
+| `purchase_date`           | String | ISO8601 formatted timestamp               |
+| `app_account_token`       | String | Optional UUID (empty string if not set)   |
 
 ## Methods
 
