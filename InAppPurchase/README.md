@@ -35,7 +35,6 @@ func _on_in_app_purchase_fetch_error(error: int, message: String) -> void:
 func _on_in_app_purchase_fetch_success(products: Array[InAppPurchaseProduct]) -> void:
 func _on_in_app_purchase_fetch_active_auto_renewable_subscriptions(product_ids: Array[Variant]) -> void:
 func _on_in_app_purchase_fetch_auto_renewable_transaction_counts(counts: Dictionary) -> void:
-func _on_in_app_purchase_fetch_transactions(Array: Array[Dictionary]) -> void:
 func _on_in_app_purchase_success(message: String) -> void:
 func _on_in_app_purchase_success_with_transaction(result: Dictionary) -> void:
 func _on_in_app_purchase_error(error: int, message: String) -> void:
@@ -55,17 +54,16 @@ func _on_in_app_purchase_restore_error(error: int, message: String) -> void:
 - `in_app_purchase_error` SignalWithArguments\<Int,Dictionary>
 - `in_app_purchase_restore_success` SignalWithArguments\<GArray>
 - `in_app_purchase_restore_error` SignalWithArguments\<Int,Dictionary>
-- `in_app_purchase_fetch_transactions` SignalWithArguments\<GArray>
 
-### Transaction Data Exposed in `in_app_purchase_success_with_transaction` nad `in_app_purchase_fetch_transactions`
-| Key 	| Type | 	Description| 
-| --- | --- | --- |
-| `product_id` 	| String | 	Product identifier| 
-| `transaction_id` | 	String | 	Unique transaction ID (UInt64 as String)| 
-| `original_transaction_id`|  	String | 	For subscription renewals| 
-| `jws_representation` 	| String 	| Cryptographic proof for server validation (only for `in_app_purchase_success_with_transaction`) | 
-| `purchase_date` 	| String 	| ISO8601 formatted timestamp| 
-| `app_account_token` 	| String | 	Optional UUID (empty string if not set)| 
+### Transaction Data Exposed in `in_app_purchase_success_with_transaction`
+| Key                       | Type   | Description                               |
+| ------------------------- | ------ | ----------------------------------------- |
+| `product_id`              | String | Product identifier                        |
+| `transaction_id`          | String | Unique transaction ID (UInt64 as String)  |
+| `original_transaction_id` | String | For subscription renewals                 |
+| `jws_representation`      | String | Cryptographic proof for server validation |
+| `purchase_date`           | String | ISO8601 formatted timestamp               |
+| `app_account_token`       | String | Optional UUID (empty string if not set)   |
 
 ## Methods
 
@@ -74,4 +72,3 @@ func _on_in_app_purchase_restore_error(error: int, message: String) -> void:
 - `fetchAutoRenewableTransactionCounts()` - Fetch all auto-renewable subscription transaction counts. Returns a dictionary, with product ids as the key, and the number of transactions as the value.  Useful for tracking monthly awards, etc.
 - `purchaseProduct(productID: String)` - Purchase a given pruduct.
 - `restorePurchases()` - Restore all the previous purchased products, returning a list of product ids.
-- `fetchTransactions()` - Fetches all transactions
