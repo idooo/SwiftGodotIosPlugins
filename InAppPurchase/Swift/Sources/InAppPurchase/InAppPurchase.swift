@@ -95,6 +95,10 @@ class InAppPurchase: Object , ObservableObject {
     @Signal var inAppPurchaseFetchAutoRenewableTransactionCounts:
         SignalWithArguments<GDictionary>
     /// @Signal
+    /// Success signal during auto-renewable transactions fetch process
+    @Signal var inAppPurchaseFetchAutoRenewableTransactions:
+        SignalWithArguments<GArray>
+    /// @Signal
     /// Error signal during purchase process
     @Signal var inAppPurchaseError: SignalWithArguments<Int, String>
     /// @Signal
@@ -201,6 +205,28 @@ class InAppPurchase: Object , ObservableObject {
             autoRenewableTransactionCounts.forEach { countGDictionary[Variant($0.key)] = Variant($0.value) }
             DispatchQueue.main.async {
                 self.inAppPurchaseFetchAutoRenewableTransactionCounts.emit(countGDictionary)
+            }
+        })
+    }
+
+    /// @Callable
+    ///
+    /// Synchronously fetches all auto-renewable subscription transactions (does not block UI, callback when done)
+    @Callable
+    func fetchAutoRenewableTransactions() {
+        fetchAutoRenewableTransactionsAsync(completion: { transactions in
+
+            // Store transactions in the cache
+            self.allAutoRenewableSubscriptionTransactions = self.allAutoRenewableSubscriptionTransactions.union(transactions)
+
+            // Convert transactions to an array of dictionaries
+            var transactionsArray = GArray()
+            for transaction in self.allAutoRenewableSubscriptionTransactions {
+                transactionsArray.append(Variant(self.convertTransactionToDictionary(from: transaction)))
+            }
+
+            DispatchQueue.main.async {
+                self.inAppPurchaseFetchAutoRenewableTransactions.emit(transactionsArray)
             }
         })
     }
