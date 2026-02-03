@@ -160,7 +160,30 @@ extension InAppPurchase {
             completion(transactions)
         }
     }
-    
+
+    internal func fetchLatestTransactionForProductAsync(
+        _ productID: String,
+        completion: @escaping (Transaction?) -> Void
+    ) {
+        guard let product = products_cached.first(where: { $0.id == productID })
+        else {
+            completion(nil)
+            return
+        }
+        Task {
+            if let verificationResult = await product.latestTransaction {
+                switch verificationResult {
+                case .verified(let transaction):
+                    completion(transaction)
+                case .unverified(_, _):
+                    completion(nil)
+                }
+            } else {
+                completion(nil)
+            }
+        }
+    }
+
     internal func restorePurchasesAsync(
         skipSync noSync: Bool,
         completion: @escaping ([String], InAppPurchaseError?) -> Void

@@ -110,6 +110,9 @@ class InAppPurchase: Object , ObservableObject {
     /// @Signal
     /// Success signal during transactions fetch process
     @Signal var inAppPurchaseFetchTransactions: SignalWithArguments<GArray>
+    /// @Signal
+    /// Success signal during latest transaction fetch for a product
+    @Signal var inAppPurchaseFetchLatestTransaction: SignalWithArguments<GDictionary>
 
     required override init() {
         super.init()
@@ -229,6 +232,23 @@ class InAppPurchase: Object , ObservableObject {
                 self.inAppPurchaseFetchAutoRenewableTransactions.emit(transactionsArray)
             }
         })
+    }
+
+    /// @Callable
+    ///
+    /// Fetches the latest transaction for a specific product (does not block UI, callback when done)
+    /// - Parameter productID: The product identifier to fetch the latest transaction for
+    @Callable
+    func fetchLatestTransactionForProduct(_ productID: String) {
+        fetchLatestTransactionForProductAsync(productID) { transaction in
+            var transactionDict = GDictionary()
+            if let transaction = transaction {
+                transactionDict = self.convertTransactionToDictionary(from: transaction)
+            }
+            DispatchQueue.main.async {
+                self.inAppPurchaseFetchLatestTransaction.emit(transactionDict)
+            }
+        }
     }
 
     /// @Callable
