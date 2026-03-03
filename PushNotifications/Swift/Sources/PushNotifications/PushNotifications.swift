@@ -61,18 +61,13 @@ class PushNotifications: Object {
     /// Emitted after authorization request completes with result: "granted" or "denied".
     @Signal var authorizationResult: SignalWithArguments<String>
 
-    required override init() {
-        super.init()
+    required init(_ context: InitContext) {
+        super.init(context)
         PushNotifications.shared = self
     }
-
-    required init(nativeHandle: UnsafeRawPointer) {
-        super.init()
-        PushNotifications.shared = self
-    }
-
+    
     deinit {
-        PushNotifications.shared = nil
+         PushNotifications.shared = nil
     }
 
     // MARK: - Public API

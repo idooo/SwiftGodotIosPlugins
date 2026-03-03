@@ -82,7 +82,7 @@ class InAppPurchase: Object , ObservableObject {
     /// @Signal
     /// Success signal during products fetch process
     @Signal var inAppPurchaseFetchSuccess:
-        SignalWithArguments<ObjectCollection<InAppPurchaseProduct>>
+        SignalWithArguments<GArray>
     /// @Signal
     /// Error signal during products fetch process
     @Signal var inAppPurchaseFetchError: SignalWithArguments<Int, String>
@@ -114,18 +114,12 @@ class InAppPurchase: Object , ObservableObject {
     /// Success signal during latest transaction fetch for a product
     @Signal var inAppPurchaseFetchLatestTransaction: SignalWithArguments<GDictionary>
 
-    required override init() {
-        super.init()
+    required init(_ context: InitContext) {
+        super.init(context)
         startTransactionListener()
         InAppPurchase.shared = self
     }
-
-    required init(nativeHandle: UnsafeRawPointer) {
-        super.init()
-        startTransactionListener()
-        InAppPurchase.shared = self
-    }
-
+    
     deinit {
         stopTransactionListener()
         InAppPurchase.shared = nil
@@ -148,9 +142,9 @@ class InAppPurchase: Object , ObservableObject {
                     }
                     return
                 }
-                var iapProducts = ObjectCollection<InAppPurchaseProduct>()
+                var iapProducts = GArray()
                 for product in self.products_cached {
-                    iapProducts.append(InAppPurchaseProduct(product: product))
+                    iapProducts.append(Variant(InAppPurchaseProduct(product: product)))
                 }
                 DispatchQueue.main.async {
                     self.inAppPurchaseFetchSuccess.emit(iapProducts)
