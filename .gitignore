@@ -83,3 +83,6 @@ Releases/
 
 # Zig
 .zig-cache
+
+# claude
+.claude
