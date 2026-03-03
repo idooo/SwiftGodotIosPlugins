@@ -19,9 +19,9 @@ There are few major benefits with this version of the plugins compared to the cl
 
 # Supported Plugins
 
-Currently, SwiftGodotIosPlugins implements the Ios **GameCenter**, **ICloud** and **InAppPurchase** integration.
+Currently, SwiftGodotIosPlugins implements the iOS **GameCenter**, **ICloud**, **InAppPurchase** and **PushNotifications** integration.
 
-Other iOS integrations (camera, arkit, apn, photo_picker) are under consideration.
+Other iOS integrations (camera, arkit, photo_picker) are under consideration.
 
 # Supported Platforms
 
@@ -41,6 +41,7 @@ Register the signals as indicated for each plugin and implement the methods that
 - [GameCenter](GameCenter/README.md)
 - [ICloud](ICloud/README.md)
 - [InAppPurchase](InAppPurchase/README.md)
+- [PushNotifications](PushNotifications/README.md)
 
 # Contributing
 
